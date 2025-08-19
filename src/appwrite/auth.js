@@ -219,7 +219,6 @@ export class AuthService {
                 userId,
                 secret,
                 newPassword,
-                confirmPassword
             );
         } catch (error) {
             console.error("Appwrite service :: completeReset :: error", error);
@@ -259,6 +258,21 @@ export class AuthService {
             throw error;
         }
     }
+
+        async getCoreUserById(userId) {
+        try {
+            const currentUser = await this.account.get();
+            if (!userId || userId === currentUser.$id) {
+                return currentUser;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error("Error in getCoreUserById:", error);
+            return null;
+        }
+    }
+
 
     // User Socials
     async updateUserSocial(userId, social) {
