@@ -1,0 +1,42 @@
+stages:
+    - build and Push
+    - trivy file scan
+    - deploy
+    - trivy image scan
+
+build-job:
+    stage: build and Push
+    image: docker:latest
+    services:
+     - docker:dind
+    before_script:
+    - echo "$DOCKERHUB_PASS" | docker login -u $DOCKERHUB_USER --password-stdin
+
+    script:
+    - docker build -t $DOCKERHUB_USER/tech:latest .
+    - docker push $DOCKERHUB_USER/tech:latest
+
+Trivy file scan:
+  stage: trivy file scan
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  script:
+    - trivy fs .
+
+deploy-job:
+    stage: deploy
+    image: docker:latest
+    services:
+     - docker:dind
+    script: 
+      - echo "hello buddy"   
+      - docker run -d --name nodecontainer -p 5173:5173 $DOCKERHUB_USER/tech:latest
+
+Scan image:
+  stage: trivy image scan
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  script:
+    - trivy image $DOCKERHUB_USER/tech:latest
